@@ -98,7 +98,7 @@ void usage_client(char *prog)
   printf("  -n\t<bytes | packets | flows | all> \n\tSelect the counters to print (applies to -N)\n");
   printf("  -S\tSum counters instead of returning a single counter for each request (applies to -N)\n");
   printf("  -a\tDisplay all table fields (even those currently unused)\n");
-  printf("  -c\t< src_mac | dst_mac | vlan | out_vlan | cos | src_host | dst_host | src_net | dst_net | src_mask | dst_mask | \n\t src_port | dst_port | tos | proto | src_as | dst_as | sum_mac | sum_host | sum_net | sum_as | \n\t sum_port | in_iface | out_iface | tag | tag2 | flows | class | std_comm | ext_comm | lrg_comm | \n\t med | local_pref | as_path | dst_roa | peer_src_ip | peer_dst_ip | peer_src_as | peer_dst_as | \n\t src_as_path | src_std_comm | src_ext_comm | src_lrg_comm | src_med | src_local_pref | src_roa | \n\t mpls_vpn_rd | mpls_pw_id | etype | sampling_rate | sampling_direction | post_nat_src_host | \n\t post_nat_dst_host | post_nat_src_port | post_nat_dst_port | nat_event | fw_event | fwd_status | \n\t tunnel_src_mac | tunnel_dst_mac | tunnel_src_host | tunnel_dst_host | tunnel_protocol | \n\t tunnel_tos | tunnel_src_port | tunnel_dst_port | vxlan | timestamp_start | timestamp_end | \n\t timestamp_arrival | mpls_label_top | mpls_label_bottom |  label | \n\t src_host_country | dst_host_country | export_proto_seqno | export_proto_version | \n\t export_proto_sysid | src_host_pocode | dst_host_pocode | src_host_coords | dst_host_coords > \n\tSelect primitives to match (required by -N and -M)\n");
+  printf("  -c\t< src_mac | dst_mac | vlan | out_vlan | cos | src_host | dst_host | src_net | dst_net | src_mask | dst_mask | \n\t src_port | dst_port | tos | proto | src_as | dst_as | sum_mac | sum_host | sum_net | sum_as | \n\t sum_port | in_iface | out_iface | tag | tag2 | flows | class | std_comm | ext_comm | lrg_comm | \n\t med | local_pref | as_path | dst_roa | peer_src_ip | peer_dst_ip | peer_src_as | peer_dst_as | \n\t src_as_path | src_std_comm | src_ext_comm | src_lrg_comm | src_med | src_local_pref | src_roa | \n\t mpls_vpn_rd | mpls_pw_id | etype | sampling_rate | sampling_direction | post_nat_src_host | \n\t post_nat_dst_host | post_nat_src_port | post_nat_dst_port | nat_event | fw_event | fwd_status | \n\t tunnel_src_mac | tunnel_dst_mac | tunnel_src_host | tunnel_dst_host | tunnel_protocol | \n\t tunnel_tos | tunnel_src_port | tunnel_dst_port | vxlan | geneve | timestamp_start | timestamp_end | \n\t timestamp_arrival | mpls_label_top | mpls_label_bottom |  label | \n\t src_host_country | dst_host_country | export_proto_seqno | export_proto_version | \n\t export_proto_sysid | src_host_pocode | dst_host_pocode | src_host_coords | dst_host_coords > \n\tSelect primitives to match (required by -N and -M)\n");
   printf("  -T\t<bytes | packets | flows>,[<# how many>] \n\tOutput top N statistics (applies to -M and -s)\n");
   printf("  -e\tClear statistics\n");
   printf("  -i\tShow time (in seconds) since statistics were last cleared (ie. pmacct -e)\n");
@@ -358,6 +358,7 @@ void write_stats_header_formatted(pm_cfgreg_t what_to_count, pm_cfgreg_t what_to
     if (what_to_count_2 & COUNT_TUNNEL_DST_PORT) printf("TUNNEL_DST_PORT  ");
     if (what_to_count_2 & COUNT_TUNNEL_TCPFLAGS) printf("TUNNEL_TCP_FLAGS  ");
     if (what_to_count_2 & COUNT_VXLAN) printf("VXLAN     ");
+    if (what_to_count_2 & COUNT_GENEVE) printf("GENEVE     ");
 
     if (what_to_count_2 & COUNT_TIMESTAMP_START) printf("TIMESTAMP_START                ");
     if (what_to_count_2 & COUNT_TIMESTAMP_END) printf("TIMESTAMP_END                  "); 
@@ -579,6 +580,7 @@ void write_stats_header_csv(pm_cfgreg_t what_to_count, pm_cfgreg_t what_to_count
     if (what_to_count_2 & COUNT_TUNNEL_DST_PORT) printf("%sTUNNEL_DST_PORT", write_sep(sep, &count));
     if (what_to_count_2 & COUNT_TUNNEL_TCPFLAGS) printf("%sTUNNEL_TCP_FLAGS", write_sep(sep, &count));
     if (what_to_count_2 & COUNT_VXLAN) printf("%sVXLAN", write_sep(sep, &count));
+    if (what_to_count_2 & COUNT_GENEVE) printf("%sGENEVE", write_sep(sep, &count));
 
     if (what_to_count_2 & COUNT_TIMESTAMP_START) printf("%sTIMESTAMP_START", write_sep(sep, &count));
     if (what_to_count_2 & COUNT_TIMESTAMP_END) printf("%sTIMESTAMP_END", write_sep(sep, &count));
@@ -2012,6 +2014,10 @@ int main(int argc,char **argv)
 	  tmpnum = atoi(match_string_token);
 	  request.ptun.tunnel_id = tmpnum;
 	}
+	else if (!strcmp(count_token[match_string_index], "geneve")) {
+	  tmpnum = atoi(match_string_token);
+	  request.ptun.tunnel_id = tmpnum;
+	}
         else if (!strcmp(count_token[match_string_index], "timestamp_start")) {
 	  struct tm tmp;
 	  char *delim = strchr(match_string_token, '.');
@@ -2811,6 +2817,11 @@ int main(int argc,char **argv)
         }
 
 	if (!have_wtc || (what_to_count_2 & COUNT_VXLAN)) {
+	  if (want_output & PRINT_OUTPUT_FORMATTED) printf("%-8u  ", ptun->tunnel_id);
+	  else if (want_output & PRINT_OUTPUT_CSV) printf("%s%u", write_sep(sep_ptr, &count), ptun->tunnel_id);
+	}
+
+	if (!have_wtc || (what_to_count_2 & COUNT_GENEVE)) {
 	  if (want_output & PRINT_OUTPUT_FORMATTED) printf("%-8u  ", ptun->tunnel_id);
 	  else if (want_output & PRINT_OUTPUT_CSV) printf("%s%u", write_sep(sep_ptr, &count), ptun->tunnel_id);
 	}
@@ -3723,6 +3734,7 @@ char *pmc_compose_json(u_int64_t wtc, u_int64_t wtc_2, u_int8_t flow_type, struc
   }
 
   if (wtc_2 & COUNT_VXLAN) json_object_set_new_nocheck(obj, "vxlan", json_integer((json_int_t)ptun->tunnel_id));
+  if (wtc_2 & COUNT_GENEVE) json_object_set_new_nocheck(obj, "vxlan", json_integer((json_int_t)ptun->tunnel_id));
 
   if (wtc_2 & COUNT_TIMESTAMP_START) {
     pmc_compose_timestamp(tstamp_str, SRVBUFLEN, &pnat->timestamp_start, TRUE, tstamp_since_epoch, tstamp_utc);

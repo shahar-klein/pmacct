@@ -202,6 +202,9 @@ typedef struct _SFSample {
   /* vxlan */
   u_int32_t vni;
 
+  u_int16_t tunnel_tlv_class;
+  u_int8_t  tunnel_tlv_type; 
+
   /* counter blocks */
   u_int32_t statsSamplingInterval;
   u_int32_t counterBlockVersion;

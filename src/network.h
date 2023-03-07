@@ -380,6 +380,7 @@ struct packet_ptrs {
   u_char *iph_ptr; /* ptr to ip header */
   u_char *tlh_ptr; /* ptr to transport level protocol header */
   u_char *vxlan_ptr; /* ptr to VXLAN VNI */
+  u_char *geneve_ptr; /* ptr to GENEVE VNI */
   u_char *payload_ptr; /* classifiers: ptr to packet payload */
   pm_class_t class; /* classifiers: class id */
   u_int8_t shadow; /* 0=the packet is being distributed for the 1st time
