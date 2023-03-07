@@ -278,6 +278,7 @@ void decodeGeneve(SFSample *sample, u_char *ptr)
   u_char *vni_ptr = NULL;
   u_int32_t vni;
   u_char *end = sample->header + sample->headerLen;
+  u_char *tlv = ptr + 8; // skip the Geneve header
 
   if (ptr > (end - 8)) return;
 
@@ -291,14 +292,23 @@ void decodeGeneve(SFSample *sample, u_char *ptr)
   vni += *vni_ptr++;
   vni <<= 8;
   vni += *vni_ptr++;
-
+        
   sample->vni = vni;
+
+  int optlen = 4*((hdr->veroptlen) & 0x3F);
+
   /* Get the optlen, which is a multiple of 4 bytes
    optlen = hdr->versoptlen & 0x3F;
    optlen *= 4
    */
   /* Hardcode option len for now; OVN uses only 8 byte option hdr */
-  ptr += sizeof(struct geneve_hdr) + UDP_PORT_GENEVE_OVNTLV_OFFSET;
+  ptr += sizeof(struct geneve_hdr) + optlen;
+
+  u_int16_t opt_class = (tlv[0] << 8) | tlv[1];
+  u_int8_t  opt_type = tlv[2];
+  sample->tunnel_opt_class = opt_class;
+  sample->tunnel_opt_type = opt_type;
+
 
   /* TBD - parse Geneve TLV */
   if (sample->sppi) {

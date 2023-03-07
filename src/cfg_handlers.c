@@ -360,6 +360,9 @@ int cfg_key_aggregate(char *filename, char *name, char *value_ptr)
     else if (!strcmp(count_token, "src_roa")) cfg_set_aggregate(filename, value, COUNT_INT_SRC_ROA, count_token);
     else if (!strcmp(count_token, "dst_roa")) cfg_set_aggregate(filename, value, COUNT_INT_DST_ROA, count_token);
     else if (!strcmp(count_token, "vxlan")) cfg_set_aggregate(filename, value, COUNT_INT_VXLAN, count_token);
+    else if (!strcmp(count_token, "geneve")) cfg_set_aggregate(filename, value, COUNT_INT_GENEVE, count_token);
+    else if (!strcmp(count_token, "tunnel_opt_class")) cfg_set_aggregate(filename, value, COUNT_INT_TUNNEL_OPT_CLASS, count_token);
+    else if (!strcmp(count_token, "tunnel_opt_type")) cfg_set_aggregate(filename, value, COUNT_INT_TUNNEL_OPT_TYPE, count_token);
     else {
       cpptrs.primitive[cpptrs.num].name = count_token;
       cpptrs.num++;
