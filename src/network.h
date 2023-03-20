@@ -380,6 +380,7 @@ struct packet_ptrs {
   u_char *iph_ptr; /* ptr to ip header */
   u_char *tlh_ptr; /* ptr to transport level protocol header */
   u_char *vxlan_ptr; /* ptr to VXLAN VNI */
+  u_char *geneve_ptr; /* ptr to GENEVE VNI */
   u_char *payload_ptr; /* classifiers: ptr to packet payload */
   pm_class_t class; /* classifiers: class id */
   u_int8_t shadow; /* 0=the packet is being distributed for the 1st time
@@ -613,7 +614,7 @@ struct pkt_tunnel_primitives {
   u_int16_t tunnel_src_port;
   u_int16_t tunnel_dst_port;
   u_int8_t tunnel_tcp_flags;
-  u_int32_t tunnel_id; /* ie. VXLAN VNI */
+  u_int32_t tunnel_id; /* ie. VXLAN/GENEVE VNI */
 };
 
 /* same as pkt_legacy_bgp_primitives but pointers in place of strings */
