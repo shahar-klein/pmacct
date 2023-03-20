@@ -288,11 +288,10 @@ int ip_handler(register struct packet_ptrs *pptrs)
 	      if (tpptrs->iph_ptr) ((*tpptrs->l3_handler)(tpptrs));
 	    }
 	  }
-	  if (dst_port == UDP_PORT_GENEVE && (off + sizeof(struct geneve_hdr) + UDP_PORT_GENEVE_OVNTLV_OFFSET <= caplen)) {
+	  if (dst_port == UDP_PORT_GENEVE && (off + sizeof(struct geneve_hdr) <= caplen)) {
 	    struct geneve_hdr *genhdr = (struct geneve_hdr *) pptrs->payload_ptr; 
 
-	    /* TBD: change vxlan_ptr to tun_ptr */
-	    pptrs->vxlan_ptr = genhdr->vni;
+	    pptrs->geneve_ptr = genhdr->vni;
 	    pptrs->payload_ptr += sizeof(struct geneve_hdr);
 
 	    if (pptrs->tun_pptrs) {
