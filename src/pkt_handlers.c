@@ -880,6 +880,18 @@ void evaluate_packet_handlers()
       primitives++;
     }
 
+    if (channels_list[index].aggregation_2 & COUNT_TUNNEL_OPT_CLASS) {
+      if (config.acct_type == ACCT_PM) channels_list[index].phandler[primitives] = tunnel_opt_class_handler;
+      else if (config.acct_type == ACCT_SF) channels_list[index].phandler[primitives] = SF_tunnel_opt_class_handler;
+      primitives++;
+    }
+
+    if (channels_list[index].aggregation_2 & COUNT_TUNNEL_OPT_TYPE) {
+      if (config.acct_type == ACCT_PM) channels_list[index].phandler[primitives] = tunnel_opt_type_handler;
+      else if (config.acct_type == ACCT_SF) channels_list[index].phandler[primitives] = SF_tunnel_opt_type_handler;
+      primitives++;
+    }
+
     if (channels_list[index].aggregation_2 & COUNT_MPLS_LABEL_STACK) {
       if (config.acct_type == ACCT_PM) channels_list[index].phandler[primitives] = mpls_label_stack_handler;
       else if (config.acct_type == ACCT_NF) channels_list[index].phandler[primitives] = NF_mpls_label_stack_handler;
@@ -1568,6 +1580,46 @@ void geneve_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs
     ptun->tunnel_id += *vni_ptr++;
     ptun->tunnel_id <<= 8;
     ptun->tunnel_id += *vni_ptr++;
+  }
+}
+
+void tunnel_opt_class_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs, char **data)
+{
+  struct pkt_tunnel_primitives *ptun = (struct pkt_tunnel_primitives *) ((*data) + chptr->extras.off_pkt_tun_primitives);
+  u_char *tlv;
+  struct geneve_hdr *hdr = NULL;
+
+  hdr = (struct geneve_hdr *)pptrs->geneve_ptr;
+  int optlen = 4*((hdr->veroptlen) & 0x3F);
+
+  if (pptrs->geneve_ptr) {
+    tlv = pptrs->geneve_ptr +optlen;
+
+    if ( tlv ) {
+      u_int16_t opt_class = (tlv[0] << 8) | tlv[1];
+      ptun->tunnel_opt_class = opt_class;
+    }
+
+  }
+}
+
+void tunnel_opt_type_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs, char **data)
+{
+  struct pkt_tunnel_primitives *ptun = (struct pkt_tunnel_primitives *) ((*data) + chptr->extras.off_pkt_tun_primitives);
+  u_char *tlv;
+  struct geneve_hdr *hdr = NULL;
+
+  hdr = (struct geneve_hdr *)pptrs->geneve_ptr;
+  int optlen = 4*((hdr->veroptlen) & 0x3F);
+
+  if (pptrs->geneve_ptr) {
+    tlv = pptrs->geneve_ptr + optlen;
+
+    if ( tlv ) {
+      u_int8_t  opt_type = tlv[2];
+      ptun->tunnel_opt_type = opt_type;
+    }
+
   }
 }
 
@@ -5902,6 +5954,22 @@ void SF_geneve_handler(struct channels_list_entry *chptr, struct packet_ptrs *pp
   SFSample *sample = (SFSample *) pptrs->f_data;
 
   ptun->tunnel_id = sample->vni;
+}
+
+void SF_tunnel_opt_class_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs, char **data)
+{
+  struct pkt_tunnel_primitives *ptun = (struct pkt_tunnel_primitives *) ((*data) + chptr->extras.off_pkt_tun_primitives);
+  SFSample *sample = (SFSample *) pptrs->f_data;
+
+  ptun->tunnel_opt_class = sample->tunnel_opt_class;
+}
+
+void SF_tunnel_opt_type_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs, char **data)
+{
+  struct pkt_tunnel_primitives *ptun = (struct pkt_tunnel_primitives *) ((*data) + chptr->extras.off_pkt_tun_primitives);
+  SFSample *sample = (SFSample *) pptrs->f_data;
+
+  ptun->tunnel_opt_type = sample->tunnel_opt_type;
 }
 
 void SF_vxlan_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs, char **data)

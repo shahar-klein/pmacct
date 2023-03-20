@@ -53,6 +53,8 @@ extern void tunnel_dst_port_handler(struct channels_list_entry *, struct packet_
 extern void tunnel_tcp_flags_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void vxlan_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void geneve_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
+extern void tunnel_opt_class_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
+extern void tunnel_opt_type_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void counters_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void counters_renormalize_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void time_new_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
@@ -200,6 +202,8 @@ extern void SF_tunnel_dst_port_handler(struct channels_list_entry *, struct pack
 extern void SF_tunnel_tcp_flags_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void SF_vxlan_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void SF_geneve_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
+extern void SF_tunnel_opt_class_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
+extern void SF_tunnel_opt_type_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void SF_tee_payload_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void SF_mpls_label_top_handler(struct channels_list_entry *, struct packet_ptrs *, char **);
 extern void SF_mpls_label_bottom_handler(struct channels_list_entry *, struct packet_ptrs *, char **);

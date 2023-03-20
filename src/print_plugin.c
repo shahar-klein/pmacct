@@ -826,6 +826,12 @@ void P_cache_purge(struct chained_cache *queue[], int index, int safe_action)
 	if (config.what_to_count_2 & COUNT_GENEVE) {
                 fprintf(f, "%-8u  ", ptun->tunnel_id);
         }
+	if (config.what_to_count_2 & COUNT_TUNNEL_OPT_CLASS) {
+                fprintf(f, "%-8x          ", ptun->tunnel_opt_class);
+        }
+	if (config.what_to_count_2 & COUNT_TUNNEL_OPT_TYPE) {
+                fprintf(f, "%-8x          ", ptun->tunnel_opt_type);
+        }
   
         if (config.what_to_count_2 & COUNT_TIMESTAMP_START) {
 	  char tstamp_str[VERYSHORTBUFLEN];
@@ -1220,6 +1226,8 @@ void P_cache_purge(struct chained_cache *queue[], int index, int safe_action)
 
 	if (config.what_to_count_2 & COUNT_VXLAN) fprintf(f, "%s%u", write_sep(sep, &count), ptun->tunnel_id);
 	if (config.what_to_count_2 & COUNT_GENEVE) fprintf(f, "%s%u", write_sep(sep, &count), ptun->tunnel_id);
+	if (config.what_to_count_2 & COUNT_TUNNEL_OPT_CLASS) fprintf(f, "%s%x", write_sep(sep, &count), ptun->tunnel_opt_class);
+	if (config.what_to_count_2 & COUNT_TUNNEL_OPT_TYPE) fprintf(f, "%s%x", write_sep(sep, &count), ptun->tunnel_opt_class);
   
         if (config.what_to_count_2 & COUNT_TIMESTAMP_START) {
 	  char tstamp_str[VERYSHORTBUFLEN];
@@ -1520,6 +1528,8 @@ void P_write_stats_header_formatted(FILE *f, int is_event)
   if (config.what_to_count_2 & COUNT_TUNNEL_TCPFLAGS) fprintf(f, "TUNNEL_TCP_FLAGS  "); 
   if (config.what_to_count_2 & COUNT_VXLAN) fprintf(f, "VXLAN     ");
   if (config.what_to_count_2 & COUNT_GENEVE) fprintf(f, "GENEVE    ");
+  if (config.what_to_count_2 & COUNT_TUNNEL_OPT_CLASS) fprintf(f, "TUNNEL_OPT_CLASS  ");
+  if (config.what_to_count_2 & COUNT_TUNNEL_OPT_TYPE)  fprintf(f, "TUNNEL_OPT_TYPE   ");
   if (config.what_to_count_2 & COUNT_TIMESTAMP_START) fprintf(f, "TIMESTAMP_START                ");
   if (config.what_to_count_2 & COUNT_TIMESTAMP_END) fprintf(f, "TIMESTAMP_END                  "); 
   if (config.what_to_count_2 & COUNT_TIMESTAMP_ARRIVAL) fprintf(f, "TIMESTAMP_ARRIVAL              ");
@@ -1652,6 +1662,8 @@ void P_write_stats_header_csv(FILE *f, int is_event)
   if (config.what_to_count_2 & COUNT_TUNNEL_TCPFLAGS) fprintf(f, "%sTUNNEL_TCP_FLAGS", write_sep(sep, &count));
   if (config.what_to_count_2 & COUNT_VXLAN) fprintf(f, "%sVXLAN", write_sep(sep, &count));
   if (config.what_to_count_2 & COUNT_GENEVE) fprintf(f, "%sGENEVE", write_sep(sep, &count));
+  if (config.what_to_count_2 & COUNT_TUNNEL_OPT_CLASS) fprintf(f, "%sTUNNEL_OPT_CLASS", write_sep(sep, &count));
+  if (config.what_to_count_2 & COUNT_TUNNEL_OPT_TYPE)  fprintf(f, "%sTUNNEL_OPT_TYPE", write_sep(sep, &count));
   if (config.what_to_count_2 & COUNT_TIMESTAMP_START) fprintf(f, "%sTIMESTAMP_START", write_sep(sep, &count));
   if (config.what_to_count_2 & COUNT_TIMESTAMP_END) fprintf(f, "%sTIMESTAMP_END", write_sep(sep, &count));
   if (config.what_to_count_2 & COUNT_TIMESTAMP_ARRIVAL) fprintf(f, "%sTIMESTAMP_ARRIVAL", write_sep(sep, &count));
