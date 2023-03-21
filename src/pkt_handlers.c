@@ -874,6 +874,16 @@ void evaluate_packet_handlers()
       primitives++;
     }
 
+    if (channels_list[index].aggregation_2 & COUNT_GENEVE) {
+      if (config.acct_type == ACCT_PM) channels_list[index].phandler[primitives] = geneve_handler;
+      else if (config.acct_type == ACCT_NF) {
+        warn_unsupported_packet_handler(COUNT_GENEVE, ACCT_NF);
+        primitives--;
+      }
+      else if (config.acct_type == ACCT_SF) channels_list[index].phandler[primitives] = SF_geneve_handler;
+      primitives++;
+    }
+
     if (channels_list[index].aggregation_2 & COUNT_MPLS_LABEL_STACK) {
       if (config.acct_type == ACCT_PM) channels_list[index].phandler[primitives] = mpls_label_stack_handler;
       else if (config.acct_type == ACCT_NF) channels_list[index].phandler[primitives] = NF_mpls_label_stack_handler;
@@ -1546,6 +1556,22 @@ void tunnel_tcp_flags_handler(struct channels_list_entry *chptr, struct packet_p
     if (pptrs->l4_proto == IPPROTO_TCP) {
       pdata->tunnel_tcp_flags = tpptrs->tcp_flags;
     }
+  }
+}
+
+void geneve_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs, char **data)
+{
+  struct pkt_tunnel_primitives *ptun = (struct pkt_tunnel_primitives *) ((*data) + chptr->extras.off_pkt_tun_primitives);
+  u_char *vni_ptr;
+
+  if (pptrs->geneve_ptr) {
+    vni_ptr = pptrs->geneve_ptr;
+
+    ptun->tunnel_id = *vni_ptr++;
+    ptun->tunnel_id <<= 8;
+    ptun->tunnel_id += *vni_ptr++;
+    ptun->tunnel_id <<= 8;
+    ptun->tunnel_id += *vni_ptr++;
   }
 }
 
@@ -5872,6 +5898,14 @@ void SF_tunnel_tcp_flags_handler(struct channels_list_entry *chptr, struct packe
       pdata->tunnel_tcp_flags = sppi->dcd_tcpFlags;
     }
   }
+}
+
+void SF_geneve_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs, char **data)
+{
+  struct pkt_tunnel_primitives *ptun = (struct pkt_tunnel_primitives *) ((*data) + chptr->extras.off_pkt_tun_primitives);
+  SFSample *sample = (SFSample *) pptrs->f_data;
+
+  ptun->tunnel_id = sample->vni;
 }
 
 void SF_vxlan_handler(struct channels_list_entry *chptr, struct packet_ptrs *pptrs, char **data)
